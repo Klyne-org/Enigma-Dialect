@@ -1,0 +1,22 @@
+# ninja log v7
+2	28	1775633849345002210	include/MetalDialect/MetalDialect.cpp.inc	2c10029d06e39937
+2	28	1775633849345002210	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalDialect.cpp.inc	2c10029d06e39937
+2	29	1775633849347321686	include/MetalDialect/MetalOps.h.inc	46a52be8433343c9
+2	29	1775633849347321686	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalOps.h.inc	46a52be8433343c9
+2	29	1775633849345158958	include/MetalDialect/MetalOpsEnums.cpp.inc	badc9745f61a69f2
+2	29	1775633849345158958	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalOpsEnums.cpp.inc	badc9745f61a69f2
+2	29	1775633849345303790	include/MetalDialect/MetalOpsEnums.h.inc	cc12049c2fdea30c
+2	29	1775633849345303790	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalOpsEnums.h.inc	cc12049c2fdea30c
+2	29	1775633849347167979	include/MetalDialect/MetalOps.cpp.inc	45b190686129a3cf
+2	29	1775633849347167979	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalOps.cpp.inc	45b190686129a3cf
+2	29	1775633849345102417	include/MetalDialect/MetalDialect.h.inc	7005d154053ea809
+2	29	1775633849345102417	/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/MetalDialect.h.inc	7005d154053ea809
+2	1323	1775633860570464744	tools/metal-opt/CMakeFiles/metal-opt.dir/metal-opt.cpp.o	100739af311b595b
+6	1316	1775633885820221169	tools/metal-opt/CMakeFiles/metal-opt.dir/metal-opt.cpp.o	100739af311b595b
+5	1027	1775633898292768993	lib/MetalDialect/CMakeFiles/obj.MetalDialect.dir/MetalDialect.cpp.o	793370b00431c4a7
+6	1320	1775633898293226655	tools/metal-opt/CMakeFiles/metal-opt.dir/metal-opt.cpp.o	100739af311b595b
+5	1358	1775633898293073198	lib/MetalDialect/CMakeFiles/obj.MetalDialect.dir/TranslateToMSL.cpp.o	b6c79975295649f7
+7	590	1775633913499113507	lib/MetalDialect/libMetalDialect.a	7723540fd5df9738
+7	627	1775633913499477712	tools/metal-translate/CMakeFiles/metal-translate.dir/metal-translate.cpp.o	5d0e781c8160f025
+590	856	1775633914082596460	tools/metal-opt/metal-opt	ac7ed0afc005bd52
+627	857	1775633914119890409	tools/metal-translate/metal-translate	ee47be205a210161

@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/cmake_install.cmake",
+		"/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/include/MetalDialect/cmake_install.cmake",
+		"/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/lib/MetalDialect/cmake_install.cmake",
+		"/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/tools/metal-opt/cmake_install.cmake",
+		"/Users/tanmay/Desktop/mlx-stuff/mlir-stuff/metal-dialect/build/tools/metal-translate/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
