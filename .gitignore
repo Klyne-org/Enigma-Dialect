@@ -1,0 +1,46 @@
+# =============================================================================
+# .gitignore — keep the repo clean
+# =============================================================================
+#
+# WHY THIS FILE EXISTS
+#   The old demo branch accidentally committed the entire `build/` directory,
+#   including a 2.3MB libMetalDialect.a. That's a common mistake on MLIR out-
+#   of-tree projects because cmake/ninja generate a lot of files. Never commit
+#   build artifacts — contributors rebuild locally, CI rebuilds fresh.
+#
+# HOW TO EXTEND
+#   Add new ignore patterns as you adopt new tools (e.g. `compile_commands.json`
+#   goes here if you use clangd from a separate build dir; `.venv/` goes here
+#   if you add Python bindings).
+
+# --- build artifacts ---------------------------------------------------------
+build/
+build-*/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.dylib
+
+# --- MLIR tablegen generated files (shouldn't appear in-tree, but just in case)
+*.inc
+*.inc.d
+
+# --- editor / IDE noise ------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- python (for future bindings) -------------------------------------------
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# --- Metal build products ---------------------------------------------------
+# These are intermediate and final artifacts from `xcrun metal` — they belong
+# in the build directory, never in the source tree.
+*.air
+*.metallib
