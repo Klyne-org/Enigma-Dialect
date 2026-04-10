@@ -60,9 +60,10 @@ def Enigma_Dialect : Dialect {
     Shading Language (MSL) or Metal host API, so that lowering from higher-
     level dialects (gpu, linalg, vector) can target Metal end-to-end.
 
-    This base is intentionally minimal — it contains just enough ops to
-    express a vector-add compute kernel. See docs/project-structure.md for
-    the full planned surface area and the order in which it will be built.
+    Coverage includes: compute/vertex/fragment entry points, thread indexing,
+    synchronization barriers, threadgroup memory, SIMD group operations,
+    atomics, GPU math built-ins, geometric/vector functions, texture
+    operations, integer intrinsics, and type casts.
   }];
 
   // When we add custom types (like !enigma.texture2d<...>) we'll flip these

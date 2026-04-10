@@ -24,8 +24,9 @@ add_mlir_library(EnigmaInitAll
   InitAll.cpp
 
   LINK_LIBS PUBLIC
-  EnigmaDialect      # registerAllEnigmaDialects needs the dialect class
-  EnigmaTargetMSL    # registerAllEnigmaTranslations needs the MSL emitter
+  EnigmaDialect
+  EnigmaTargetMSL
   MLIRIR
+  MLIRSCFDialect
   MLIRSupport
 )

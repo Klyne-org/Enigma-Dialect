@@ -19,6 +19,7 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/IR/DialectRegistry.h"
 
 void enigma::registerAllEnigmaDialects(mlir::DialectRegistry &registry) {
@@ -31,6 +32,7 @@ void enigma::registerAllEnigmaDialects(mlir::DialectRegistry &registry) {
   registry.insert<mlir::arith::ArithDialect>();
   registry.insert<mlir::memref::MemRefDialect>();
   registry.insert<mlir::func::FuncDialect>();
+  registry.insert<mlir::scf::SCFDialect>();
 
   // NEXT STEPS: when we add a conversion pass from upstream `gpu` dialect,
   // `registry.insert<mlir::gpu::GPUDialect>();` goes here.

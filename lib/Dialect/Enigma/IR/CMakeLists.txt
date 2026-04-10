@@ -45,6 +45,7 @@ add_mlir_dialect_library(EnigmaDialect
 
   # --- libraries we need at link time -----------------------------------
   LINK_LIBS PUBLIC
-  MLIRIR            # core MLIR IR types (Operation, Value, Type, Region, …)
-  MLIRSupport       # LLVM-style support utilities
+  MLIRIR
+  MLIRInferTypeOpInterface
+  MLIRSupport
 )
