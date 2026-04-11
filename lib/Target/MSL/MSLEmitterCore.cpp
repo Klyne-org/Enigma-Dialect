@@ -47,9 +47,14 @@ std::string MSLEmitter::getTypeString(Type type) {
   if (type.isInteger(32)) return "int";
   if (type.isInteger(64)) return "long";
   if (type.isIndex())     return "uint";
-  if (auto vecTy = dyn_cast<VectorType>(type))
-    return getTypeString(vecTy.getElementType()) +
-           std::to_string(vecTy.getNumElements());
+  if (auto vecTy = dyn_cast<VectorType>(type)) {
+    unsigned n = vecTy.getNumElements();
+    std::string elem = getTypeString(vecTy.getElementType());
+    if (n < 2 || n > 4)
+      return "/* unsupported vector width " + std::to_string(n) + " */ " +
+             elem + std::to_string(n);
+    return elem + std::to_string(n);
+  }
   return "float";
 }
 
@@ -65,9 +70,12 @@ std::string MSLEmitter::getMemFlagsString(MemFlags flags) {
 }
 
 std::string MSLEmitter::getMemoryOrderString(MemoryOrder order) {
-  // Metal only supports memory_order_relaxed for most atomics.
-  // Acquire/release semantics are handled via barriers instead.
-  (void)order;
+  switch (order) {
+  case MemoryOrder::relaxed: return "memory_order_relaxed";
+  case MemoryOrder::acquire: return "memory_order_acquire";
+  case MemoryOrder::release: return "memory_order_release";
+  case MemoryOrder::acq_rel: return "memory_order_acq_rel";
+  }
   return "memory_order_relaxed";
 }
 
@@ -190,7 +198,8 @@ static void emitFuncArgs(MSLEmitter &e, llvm::raw_ostream &os,
       os << "    " << e.getTypeString(argType) << " "
          << e.getName(entryBlock.getArgument(i)) << " [[stage_in]]";
     } else {
-      os << "    " << e.getTypeString(argType) << " "
+      // Scalar kernel args must be passed as constant references in MSL
+      os << "    constant " << e.getTypeString(argType) << "& "
          << e.getName(entryBlock.getArgument(i))
          << " [[buffer(" << i << ")]]";
     }

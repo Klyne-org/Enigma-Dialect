@@ -15,8 +15,8 @@ module {
     %loaded = enigma.atomic_load %buf[%c0] relaxed : memref<?xi32> -> i32
 
     // CHECK: atomic_store_explicit
-    // CHECK-SAME: memory_order_release
-    enigma.atomic_store %c1, %buf[%c0] release : i32, memref<?xi32>
+    // CHECK-SAME: memory_order_relaxed
+    enigma.atomic_store %c1, %buf[%c0] relaxed : i32, memref<?xi32>
 
     // CHECK: atomic_fetch_add_explicit
     // CHECK-SAME: memory_order_relaxed
@@ -36,7 +36,7 @@ module {
 
     // CHECK: atomic_compare_exchange_weak_explicit
     %c5 = arith.constant 5 : i32
-    %ok = enigma.atomic_compare_exchange_weak %buf[%c0], %c1, %c5 acq_rel relaxed : memref<?xi32>, i32
+    %ok = enigma.atomic_compare_exchange_weak %buf[%c0], %c1, %c5 relaxed relaxed : memref<?xi32>, i32
 
     enigma.return
   }

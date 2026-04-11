@@ -18,13 +18,13 @@ module {
     %ctz = enigma.ctz %v : i32
     // CHECK: reverse_bits(
     %rb = enigma.reverse_bits %v : i32
-    // CHECK: abs_diff(
+    // CHECK: absdiff(
     %ad = enigma.abs_diff %v, %w : i32
-    // CHECK: add_sat(
+    // CHECK: addsat(
     %as = enigma.add_sat %v, %w : i32
-    // CHECK: sub_sat(
+    // CHECK: subsat(
     %ss = enigma.sub_sat %v, %w : i32
-    // CHECK: mul_hi(
+    // CHECK: mulhi(
     %mh = enigma.mul_hi %v, %w : i32
     // CHECK: rotate(
     %rot = enigma.rotate %v, %w : i32
@@ -32,7 +32,7 @@ module {
     %eb = enigma.extract_bits %v 4 8 : i32
     // CHECK: insert_bits(
     %ib = enigma.insert_bits %v, %w 4 8 : i32
-    // CHECK: mad_sat(
+    // CHECK: madsat(
     %ms = enigma.mad_sat %v, %w, %v : i32
 
     memref.store %pc, %buf[%id] : memref<?xi32>

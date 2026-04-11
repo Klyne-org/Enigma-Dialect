@@ -26,7 +26,7 @@
 //     3. Compile the output with `xcrun metal -c -` to confirm it's
 //        valid MSL. (Yes, do this even for tiny changes — this is the
 //        oracle step.)
-//     4. Paste the interesting lines of the output as CHECK: lines.
+//     4. Paste the interesting lines of the output as FileCheck lines.
 //
 // =============================================================================
 
@@ -37,14 +37,14 @@
 // The kernel function signature. Note that v0/v1/v2 are the stable
 // names our emitter assigns to SSA values in visitation order.
 // CHECK-LABEL: kernel void vector_add(
-// CHECK:         device float* v0 [[buffer(0)]],
-// CHECK:         device float* v1 [[buffer(1)]],
-// CHECK:         device float* v2 [[buffer(2)]],
-// CHECK:         uint _tid [[thread_position_in_grid]]
+// CHECK:         device float* v0 {{\[\[}}buffer(0)]],
+// CHECK:         device float* v1 {{\[\[}}buffer(1)]],
+// CHECK:         device float* v2 {{\[\[}}buffer(2)]],
+// CHECK:         uint3 _tpg {{\[\[}}thread_position_in_grid]]
 // CHECK:       ) {
 
 // The body — thread id, two loads, an add, a store.
-// CHECK:         uint v{{[0-9]+}} = _tid;
+// CHECK:         uint v{{[0-9]+}} = _tpg.x;
 // CHECK:         float v{{[0-9]+}} = v0[
 // CHECK:         float v{{[0-9]+}} = v1[
 // CHECK:         float v{{[0-9]+}} = v{{[0-9]+}} + v{{[0-9]+}};

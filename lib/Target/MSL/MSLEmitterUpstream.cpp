@@ -4,25 +4,55 @@
 using namespace mlir;
 using namespace enigma;
 
+/// Emit a linearized index expression for a multi-dimensional memref access.
+/// For memref<MxNxf32>[i, j] this emits "i * N + j".
+/// For 1D memref<?xf32>[i] this just emits "i".
+static void emitLinearIndex(MSLEmitter &e, llvm::raw_ostream &os,
+                            MemRefType memrefType,
+                            mlir::Operation::operand_range indices) {
+  unsigned rank = indices.size();
+  if (rank == 0) {
+    os << "0";
+    return;
+  }
+  if (rank == 1) {
+    os << e.getName(indices[0]);
+    return;
+  }
+
+  // Compute row-major linearization: idx[0]*s1*s2*...*s_{n-1} + idx[1]*s2*...*s_{n-1} + ... + idx[n-1]
+  // where s_i is the size of dimension i.
+  auto shape = memrefType.getShape();
+  bool needsPlus = false;
+  for (unsigned i = 0; i < rank; ++i) {
+    if (needsPlus) os << " + ";
+    os << e.getName(indices[i]);
+    // Multiply by the product of all trailing dimensions
+    for (unsigned j = i + 1; j < rank; ++j) {
+      if (ShapedType::isDynamic(shape[j]))
+        os << " * /*dynamic_dim" << j << "*/";
+      else
+        os << " * " << shape[j];
+    }
+    needsPlus = true;
+  }
+}
+
 void MSLEmitter::emitLoad(memref::LoadOp op) {
   std::string ty = getTypeString(op.getResult().getType());
   auto &os = stream();
+  auto memrefType = op.getMemRefType();
   os << "    " << ty << " " << getName(op.getResult()) << " = "
      << getName(op.getMemRef()) << "[";
-  for (unsigned i = 0, e = op.getIndices().size(); i < e; ++i) {
-    if (i > 0) os << " * /* stride */ + ";
-    os << getName(op.getIndices()[i]);
-  }
+  emitLinearIndex(*this, os, memrefType, op.getIndices());
   os << "];\n";
 }
 
 void MSLEmitter::emitStore(memref::StoreOp op) {
   auto &os = stream();
+  auto memrefType = op.getMemRefType();
   os << "    " << getName(op.getMemRef()) << "[";
-  for (unsigned i = 0, e = op.getIndices().size(); i < e; ++i) {
-    if (i > 0) os << " * /* stride */ + ";
-    os << getName(op.getIndices()[i]);
-  }
+  emitLinearIndex(*this, os, memrefType, op.getIndices());
   os << "] = " << getName(op.getValue()) << ";\n";
 }
 

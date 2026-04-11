@@ -19,12 +19,12 @@
 // CHECK: using namespace metal;
 
 // CHECK-LABEL: kernel void scale_constant(
-// CHECK:         constant float* v0 [[buffer(0)]],
-// CHECK:         device float* v1 [[buffer(1)]],
-// CHECK:         uint _tid [[thread_position_in_grid]]
+// CHECK:         constant float* v0 {{\[\[}}buffer(0)]],
+// CHECK:         device float* v1 {{\[\[}}buffer(1)]],
+// CHECK:         uint3 _tpg {{\[\[}}thread_position_in_grid]]
 // CHECK:       ) {
 
-// CHECK:         uint v{{[0-9]+}} = _tid;
+// CHECK:         uint v{{[0-9]+}} = _tpg.x;
 // CHECK:         float v{{[0-9]+}} = v0[
 // CHECK:         float v{{[0-9]+}} = v{{[0-9]+}} + v{{[0-9]+}};
 // CHECK:         v1[
