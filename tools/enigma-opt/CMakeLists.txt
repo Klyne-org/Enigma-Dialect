@@ -15,12 +15,25 @@ get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 
 add_llvm_executable(enigma-opt enigma-opt.cpp)
 
-target_link_libraries(enigma-opt PRIVATE
-  EnigmaInitAll
-  ${dialect_libs}
-  MLIROptLib
-  MLIRParser
-)
+# When libMLIR.dylib is available, link against it instead of the per-dialect
+# static archives. Linking both causes duplicate TypeID registrations (each
+# .a re-instantiates statics already present in the dylib) → attribute
+# uniquer "storage uniquer isn't initialized" at parse time.
+if(TARGET MLIR)
+  target_link_libraries(enigma-opt PRIVATE
+    EnigmaInitAll
+    MLIR
+    MLIROptLib
+    MLIRParser
+  )
+else()
+  target_link_libraries(enigma-opt PRIVATE
+    EnigmaInitAll
+    ${dialect_libs}
+    MLIROptLib
+    MLIRParser
+  )
+endif()
 
 # Sanity check that every MLIR library enigma-opt references is actually
 # linked. Catches "forgot to add X to LINK_LIBS" before it becomes a

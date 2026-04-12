@@ -8,6 +8,7 @@
 #include "enigma/Dialect/Enigma/IR/EnigmaDialect.h"
 
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/OpImplementation.h"
 
 using namespace mlir;
