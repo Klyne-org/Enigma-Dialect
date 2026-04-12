@@ -176,15 +176,13 @@ fi
 if [ "$MODE" = "--gpu" ]; then
     echo ""
     printf "${CYAN}=== Phase 5: GPU Runtime Tests ===${NC}\n"
-    if [ -x "$RUNNER" ]; then
-        for f in "$ROOT"/test/gpu/*.mlir; do
-            name="gpu/$(basename "$f")"
-            run_test "$name" "'$RUNNER' '$f'"
-        done
+    if bash "$ROOT/test/gpu/run-gpu-tests.sh"; then
+        printf "  ${GREEN}PASS${NC}  gpu suite\n"
+        PASS=$((PASS + 1))
     else
-        echo "  enigma-runner not found — skipping GPU tests"
-        echo "  Build with: ninja -C build enigma-runner"
-        SKIP=$((SKIP + 1))
+        printf "  ${RED}FAIL${NC}  gpu suite\n"
+        FAIL=$((FAIL + 1))
+        ERRORS="$ERRORS\n  - gpu suite"
     fi
 elif [ "$MODE" = "all" ]; then
     echo ""
