@@ -1,4 +1,7 @@
 #include "enigma-c/Dialects.h"
+#include "mlir-c/Dialect/Arith.h"
+#include "mlir-c/Dialect/Func.h"
+#include "mlir-c/Dialect/MemRef.h"
 #include "mlir/Bindings/Python/NanobindAdaptors.h"
 
 namespace nb = nanobind;
@@ -10,10 +13,23 @@ NB_MODULE(_mlirDialectsEnigma, m) {
   m.def(
       "register_dialect",
       [](MlirContext context, bool load) {
-        MlirDialectHandle handle = mlirGetDialectHandle__enigma__();
-        mlirDialectHandleRegisterDialect(handle, context);
+        MlirDialectHandle enigmaHandle = mlirGetDialectHandle__enigma__();
+        mlirDialectHandleRegisterDialect(enigmaHandle, context);
+
+        MlirDialectHandle arithHandle = mlirGetDialectHandle__arith__();
+        mlirDialectHandleRegisterDialect(arithHandle, context);
+
+        MlirDialectHandle memrefHandle = mlirGetDialectHandle__memref__();
+        mlirDialectHandleRegisterDialect(memrefHandle, context);
+
+        MlirDialectHandle funcHandle = mlirGetDialectHandle__func__();
+        mlirDialectHandleRegisterDialect(funcHandle, context);
+
         if (load) {
-          mlirDialectHandleLoadDialect(handle, context);
+          mlirDialectHandleLoadDialect(enigmaHandle, context);
+          mlirDialectHandleLoadDialect(arithHandle, context);
+          mlirDialectHandleLoadDialect(memrefHandle, context);
+          mlirDialectHandleLoadDialect(funcHandle, context);
         }
       },
       nb::arg("context"), nb::arg("load") = true);

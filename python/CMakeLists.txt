@@ -24,6 +24,9 @@ declare_mlir_python_extension(EnigmaPythonSources.Extension
   EMBED_CAPI_LINK_LIBS
     MLIREnigmaCAPI
     MLIRCAPITransforms
+    MLIRCAPIArith
+    MLIRCAPIMemRef
+    MLIRCAPIFunc
 )
 
 set(_source_components
