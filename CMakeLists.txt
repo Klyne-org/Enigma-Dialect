@@ -70,6 +70,8 @@ option(ENIGMA_ENABLE_METAL_RUNTIME
   "Build the Metal host runtime and enigma-runner (requires macOS + Metal.framework)"
   ${APPLE})
 
+option(ENIGMA_ENABLE_PYTHON_BINDINGS "Build Python bindings for the Enigma dialect" OFF)
+
 # -----------------------------------------------------------------------------
 # Find MLIR and LLVM.
 # -----------------------------------------------------------------------------
@@ -79,6 +81,17 @@ option(ENIGMA_ENABLE_METAL_RUNTIME
 # my machine" bugs.
 find_package(MLIR REQUIRED CONFIG)
 find_package(LLVM REQUIRED CONFIG)
+
+# When the underlying LLVM was built with LLVM_BUILD_LLVM_DYLIB=ON (as our
+# scripts/build_llvm.sh does), mixing static MLIR archive libs with the LLVM
+# dylib in a single binary causes duplicate static registrations — TypeID
+# registries get instantiated twice and attribute uniquers like TypeAttr fail
+# with "storage uniquer isn't initialized". Force linking against the MLIR
+# dylib instead so every translation unit shares one copy.
+if(LLVM_LINK_LLVM_DYLIB AND EXISTS "${LLVM_LIBRARY_DIR}/libMLIR.dylib")
+  set(LLVM_LINK_LLVM_DYLIB ON CACHE BOOL "" FORCE)
+  set(MLIR_LINK_MLIR_DYLIB ON CACHE BOOL "" FORCE)
+endif()
 
 message(STATUS "Using MLIR in: ${MLIR_DIR}")
 message(STATUS "Using LLVM in: ${LLVM_DIR}")
@@ -126,6 +139,13 @@ add_subdirectory(tools/enigma-translate)             # enigma-translate binary
 # Metal runtime + enigma-runner are gated — only built on mac with Metal.
 if(ENIGMA_ENABLE_METAL_RUNTIME)
   add_subdirectory(tools/enigma-runner)
+endif()
+
+# Python bindings (optional — requires LLVM built with MLIR_ENABLE_BINDINGS_PYTHON=ON)
+if(ENIGMA_ENABLE_PYTHON_BINDINGS)
+  include(MLIRDetectPythonEnv)
+  mlir_configure_python_dev_packages()
+  add_subdirectory(python)
 endif()
 
 # Tests are always configured so `ninja check-enigma` works on every platform.

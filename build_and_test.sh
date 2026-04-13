@@ -58,4 +58,4 @@ echo "==> Building"
 "${BUILD_CMD[@]}"
 
 echo "==> Running tests"
-bash "$ROOT/test/run_tests.sh" "${TEST_ARGS[@]}"
+bash "$ROOT/test/run_tests.sh" "${TEST_ARGS[@]+"${TEST_ARGS[@]}"}"

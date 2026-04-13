@@ -30,3 +30,7 @@ add_mlir_library(EnigmaInitAll
   MLIRSCFDialect
   MLIRSupport
 )
+
+if(ENIGMA_ENABLE_PYTHON_BINDINGS)
+  add_subdirectory(CAPI)
+endif()
