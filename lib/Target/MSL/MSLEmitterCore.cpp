@@ -423,6 +423,8 @@ void MSLEmitter::emitOp(Operation &op) {
   if (isa<ReflectOp>(op))     return emitGeomVecBinary(&op, "reflect");
   if (auto o = dyn_cast<RefractOp>(op)) return emitRefract(o);
   if (isa<FaceforwardOp>(op)) return emitGeomVecTernary(&op, "faceforward");
+  if (auto o = dyn_cast<VecMakeOp>(op))    return emitVecMake(o);
+  if (auto o = dyn_cast<VecExtractOp>(op)) return emitVecExtract(o);
 
   // --- Texture ---
   if (auto o = dyn_cast<TextureReadOp>(op))     return emitTextureRead(o);

@@ -9,8 +9,37 @@
 #define ENIGMA_GEOM_OPS_TD
 
 include "enigma/Dialect/Enigma/IR/EnigmaDialect.td"
+include "mlir/IR/BuiltinAttributes.td"
 include "mlir/IR/CommonTypeConstraints.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+
+def Enigma_VecMakeOp : Enigma_Op<"vec_make", [Pure]> {
+  let summary = "Assemble a short vector (1-4 lanes) from scalar values";
+  let description = [{
+    Build a `vector<Nx{f|i}>` from N scalar operands. N must be in {1,2,3,4}
+    (MSL native vector widths). All operands must share the element type of
+    the result. The op lowers to `floatN(a, b, c, ...)` / `intN(...)` in MSL.
+  }];
+  let arguments = (ins Variadic<AnyTypeOf<[AnyFloat, AnyInteger]>>:$elems);
+  let results   = (outs AnyVectorOfNonZeroRank:$result);
+  let assemblyFormat =
+      "$elems attr-dict `:` type($elems) `->` type($result)";
+  let hasVerifier = 1;
+}
+
+def Enigma_VecExtractOp : Enigma_Op<"vec_extract", [Pure]> {
+  let summary = "Extract a single lane from a short vector";
+  let description = [{
+    Extract lane `lane` from a short vector. `lane` must be in
+    `[0, N)` where N is the number of elements of the input. The result
+    type must match the input's element type. Lowers to `.x/.y/.z/.w` in MSL.
+  }];
+  let arguments = (ins AnyVectorOfNonZeroRank:$input, I32Attr:$lane);
+  let results   = (outs AnyTypeOf<[AnyFloat, AnyInteger]>:$result);
+  let assemblyFormat =
+      "$input `,` $lane attr-dict `:` type($input) `->` type($result)";
+  let hasVerifier = 1;
+}
 
 def Enigma_DotOp : Enigma_Op<"dot",
     [Pure, AllTypesMatch<["lhs", "rhs"]>]> {

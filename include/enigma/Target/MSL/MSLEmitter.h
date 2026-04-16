@@ -97,6 +97,8 @@ public:
   void emitGeomVecUnary(mlir::Operation *op, llvm::StringRef funcName);
   void emitGeomVecTernary(mlir::Operation *op, llvm::StringRef funcName);
   void emitRefract(RefractOp op);
+  void emitVecMake(VecMakeOp op);
+  void emitVecExtract(VecExtractOp op);
 
   // === Texture (MSLEmitterTexture.cpp) ===
   void emitTextureRead(TextureReadOp op);

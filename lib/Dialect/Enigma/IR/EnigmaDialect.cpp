@@ -9,6 +9,7 @@
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/OpImplementation.h"
 
 using namespace mlir;
@@ -155,4 +156,46 @@ void FragmentOp::print(OpAsmPrinter &printer) {
 
 ParseResult FragmentOp::parse(OpAsmParser &parser, OperationState &result) {
   return parseFunctionLikeOp(parser, result, /*hasResults=*/true);
+}
+
+// ============================================================================
+// enigma.vec_make — verifier
+// ============================================================================
+
+LogicalResult VecMakeOp::verify() {
+  auto vecTy = llvm::cast<VectorType>(getResult().getType());
+  int64_t n = vecTy.getNumElements();
+  if (n < 1 || n > 4)
+    return emitOpError("vec_make result vector width must be 1, 2, 3, or 4 "
+                       "(got ") << n << ")";
+  if (static_cast<int64_t>(getElems().size()) != n)
+    return emitOpError("vec_make requires exactly ") << n
+        << " scalar operands to build a " << vecTy << " (got "
+        << getElems().size() << ")";
+  Type elemTy = vecTy.getElementType();
+  for (auto [idx, v] : llvm::enumerate(getElems())) {
+    if (v.getType() != elemTy)
+      return emitOpError("vec_make operand #") << idx
+          << " type " << v.getType()
+          << " does not match result element type " << elemTy;
+  }
+  return success();
+}
+
+// ============================================================================
+// enigma.vec_extract — verifier
+// ============================================================================
+
+LogicalResult VecExtractOp::verify() {
+  auto vecTy = llvm::cast<VectorType>(getInput().getType());
+  int64_t n = vecTy.getNumElements();
+  int32_t lane = getLane();
+  if (lane < 0 || lane >= n)
+    return emitOpError("vec_extract lane ") << lane
+        << " out of range [0, " << n << ") for " << vecTy;
+  if (getResult().getType() != vecTy.getElementType())
+    return emitOpError("vec_extract result type ")
+        << getResult().getType()
+        << " does not match input element type " << vecTy.getElementType();
+  return success();
 }

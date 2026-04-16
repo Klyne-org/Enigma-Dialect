@@ -50,3 +50,20 @@ void MSLEmitter::emitRefract(RefractOp op) {
            << ", " << getName(op.getNormal())
            << ", " << getName(op.getEta()) << ");\n";
 }
+
+void MSLEmitter::emitVecMake(VecMakeOp op) {
+  std::string ty = getTypeString(op.getResult().getType());
+  auto &os = stream();
+  os << "    " << ty << " " << getName(op.getResult()) << " = " << ty
+     << "(";
+  llvm::interleaveComma(op.getElems(), os,
+                        [&](mlir::Value v) { os << getName(v); });
+  os << ");\n";
+}
+
+void MSLEmitter::emitVecExtract(VecExtractOp op) {
+  static const char *kLanes[] = {".x", ".y", ".z", ".w"};
+  std::string ty = getTypeString(op.getResult().getType());
+  stream() << "    " << ty << " " << getName(op.getResult()) << " = "
+           << getName(op.getInput()) << kLanes[op.getLane()] << ";\n";
+}
