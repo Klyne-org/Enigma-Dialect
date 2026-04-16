@@ -561,6 +561,25 @@ Shader specialization constants set at pipeline creation time.
 
 Maps to `constant T name [[function_constant(N)]];` in MSL.
 
+**Emission model**: the MSL emitter walks every `enigma.function_constant` in
+the module and hoists one declaration per unique index to **file scope**,
+above all kernels. The kernel-body op is a no-op; references inside the
+kernel resolve to the stable name `fc<N>`. The same index used from multiple
+kernels emits exactly one file-scope declaration and is shared.
+
+```msl
+#include <metal_stdlib>
+using namespace metal;
+
+constant float fc0 [[function_constant(0)]];
+constant float fc1 [[function_constant(1)]];
+
+kernel void k(...) {
+    float v = fc0 + fc1;
+    ...
+}
+```
+
 ---
 
 ## Control Flow (via SCF Dialect)
@@ -607,13 +626,48 @@ MSL `<metal_pack>` functions for packing float/half vectors into compact integer
 
 ## Matrix Operations
 
+Matrices are modelled as 2-D MLIR vectors: `vector<CxRxf32>` is a Metal
+`floatCxR` (column-major, C columns × R rows). `getTypeString` in the MSL
+emitter maps the MLIR type directly — there is no separate `!enigma.matrix`
+type.
+
 ### Standard Matrix
 
 | Op | MSL | Description |
 |----|-----|-------------|
+| `enigma.mat_make %c0, ..., %cN` | `floatCxR(c0, ..., cN)` | Build matrix from C column vectors |
 | `enigma.matmul %a, %b` | `A * B` | Matrix multiply |
 | `enigma.transpose %m` | `transpose(m)` | Matrix transpose |
 | `enigma.determinant %m` | `determinant(m)` | Matrix determinant |
+
+`mat_make` is the matrix-constructor counterpart of `vec_make`. It takes C
+operands, each of type `vector<RxT>`, and produces a `vector<CxRxT>`. C and
+R must each be in {2, 3, 4}. All columns and the result share the same
+element type. Example:
+
+```mlir
+%c0 = enigma.vec_make %a, %b, %c, %d : f32, f32, f32, f32 -> vector<4xf32>
+%c1 = enigma.vec_make %a, %b, %c, %d : f32, f32, f32, f32 -> vector<4xf32>
+%c2 = enigma.vec_make %a, %b, %c, %d : f32, f32, f32, f32 -> vector<4xf32>
+%c3 = enigma.vec_make %a, %b, %c, %d : f32, f32, f32, f32 -> vector<4xf32>
+%M  = enigma.mat_make %c0, %c1, %c2, %c3
+        : vector<4xf32>, vector<4xf32>, vector<4xf32>, vector<4xf32>
+        -> vector<4x4xf32>
+%T  = enigma.transpose %M : vector<4x4xf32> -> vector<4x4xf32>
+%d  = enigma.determinant %T : vector<4x4xf32> -> f32
+```
+
+emits:
+
+```msl
+float4 c0 = float4(a, b, c, d);
+float4 c1 = float4(a, b, c, d);
+float4 c2 = float4(a, b, c, d);
+float4 c3 = float4(a, b, c, d);
+float4x4 M = float4x4(c0, c1, c2, c3);
+float4x4 T = transpose(M);
+float   d = determinant(T);
+```
 
 ### Simdgroup Matrix (Apple GPU, 8x8 tiles)
 

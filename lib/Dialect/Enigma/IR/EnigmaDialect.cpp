@@ -183,6 +183,37 @@ LogicalResult VecMakeOp::verify() {
 }
 
 // ============================================================================
+// enigma.mat_make — verifier
+// ============================================================================
+
+LogicalResult MatMakeOp::verify() {
+  auto resTy = llvm::cast<VectorType>(getResult().getType());
+  auto resShape = resTy.getShape();
+  if (resShape.size() != 2)
+    return emitOpError("mat_make result must be a 2-D vector, got ") << resTy;
+  int64_t cols = resShape[0];
+  int64_t rows = resShape[1];
+  if (cols < 2 || cols > 4 || rows < 2 || rows > 4)
+    return emitOpError("mat_make matrix dims must each be 2, 3, or 4 (got ")
+        << cols << "x" << rows << ")";
+  if (static_cast<int64_t>(getColumns().size()) != cols)
+    return emitOpError("mat_make requires ") << cols
+        << " column operands to build a " << resTy << " (got "
+        << getColumns().size() << ")";
+  Type elemTy = resTy.getElementType();
+  for (auto [idx, v] : llvm::enumerate(getColumns())) {
+    auto colTy = llvm::dyn_cast<VectorType>(v.getType());
+    if (!colTy || colTy.getShape().size() != 1 ||
+        colTy.getNumElements() != rows ||
+        colTy.getElementType() != elemTy)
+      return emitOpError("mat_make column #") << idx
+          << " must be vector<" << rows << "x" << elemTy << ">, got "
+          << v.getType();
+  }
+  return success();
+}
+
+// ============================================================================
 // enigma.vec_extract — verifier
 // ============================================================================
 

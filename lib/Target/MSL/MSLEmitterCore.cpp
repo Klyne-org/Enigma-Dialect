@@ -48,8 +48,17 @@ std::string MSLEmitter::getTypeString(Type type) {
   if (type.isInteger(64)) return "long";
   if (type.isIndex())     return "uint";
   if (auto vecTy = dyn_cast<VectorType>(type)) {
-    unsigned n = vecTy.getNumElements();
+    auto shape = vecTy.getShape();
     std::string elem = getTypeString(vecTy.getElementType());
+    if (shape.size() == 2) {
+      // MSL matrices: CxR stored as vector<CxRxT> — emit as elem + "CxR"
+      int64_t cols = shape[0], rows = shape[1];
+      if (cols < 2 || cols > 4 || rows < 2 || rows > 4)
+        return "/* unsupported matrix dims " + std::to_string(cols) + "x" +
+               std::to_string(rows) + " */ " + elem;
+      return elem + std::to_string(cols) + "x" + std::to_string(rows);
+    }
+    unsigned n = vecTy.getNumElements();
     if (n < 2 || n > 4)
       return "/* unsupported vector width " + std::to_string(n) + " */ " +
              elem + std::to_string(n);
@@ -172,6 +181,37 @@ void MSLEmitter::emitBuiltinParam(llvm::StringRef builtin) {
 void MSLEmitter::emitPreamble() {
   os << "#include <metal_stdlib>\n";
   os << "using namespace metal;\n\n";
+}
+
+// ============================================================================
+// File-scope function constants
+//
+// MSL requires [[function_constant(N)]] declarations at file scope, not inside
+// a kernel body. We walk all FunctionConstantOp results in the module, assign
+// each the stable name "fc<N>", and emit one declaration per unique index.
+// emitFunctionConstant() at the body site is then a no-op.
+// ============================================================================
+
+void MSLEmitter::emitFunctionConstants(ModuleOp module) {
+  llvm::DenseMap<unsigned, std::pair<std::string, Type>> seen;
+  module.walk([&](FunctionConstantOp op) {
+    unsigned idx = op.getIndex();
+    std::string name = "fc" + std::to_string(idx);
+    valueNames[op.getResult()] = name;
+    if (!seen.count(idx))
+      seen[idx] = {name, op.getResult().getType()};
+  });
+  if (seen.empty())
+    return;
+  SmallVector<unsigned> indices;
+  for (auto &kv : seen) indices.push_back(kv.first);
+  llvm::sort(indices);
+  for (unsigned idx : indices) {
+    auto &entry = seen[idx];
+    os << "constant " << getTypeString(entry.second) << " " << entry.first
+       << " [[function_constant(" << idx << ")]];\n";
+  }
+  os << "\n";
 }
 
 // ============================================================================
@@ -523,6 +563,7 @@ void MSLEmitter::emitOp(Operation &op) {
   if (isa<UnpackUnorm10a2ToFloatOp>(op)) return emitUnpackOp(&op, "unpack_unorm10a2_to_float");
 
   // --- Matrix ---
+  if (auto o = dyn_cast<MatMakeOp>(op))      return emitMatMake(o);
   if (auto o = dyn_cast<MatMulOp>(op))       return emitMatMul(o);
   if (auto o = dyn_cast<TransposeOp>(op))    return emitTranspose(o);
   if (auto o = dyn_cast<DeterminantOp>(op))  return emitDeterminant(o);
@@ -541,6 +582,7 @@ void MSLEmitter::emitOp(Operation &op) {
 LogicalResult enigma::translateToMSL(ModuleOp module, llvm::raw_ostream &os) {
   MSLEmitter emitter(os);
   emitter.emitPreamble();
+  emitter.emitFunctionConstants(module);
   module.walk([&](KernelOp k) { emitter.emitKernel(k); });
   module.walk([&](VertexOp v) { emitter.emitVertex(v); });
   module.walk([&](FragmentOp f) { emitter.emitFragment(f); });

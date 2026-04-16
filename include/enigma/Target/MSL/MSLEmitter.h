@@ -43,6 +43,7 @@ public:
 
   // === Top-level emission ===
   void emitPreamble();
+  void emitFunctionConstants(mlir::ModuleOp module);
   void emitKernel(KernelOp kernel);
   void emitVertex(VertexOp vertex);
   void emitFragment(FragmentOp fragment);
@@ -141,6 +142,7 @@ public:
   void emitUnpackOp(mlir::Operation *op, llvm::StringRef funcName);
 
   // === Matrix (MSLEmitterMatrix.cpp) ===
+  void emitMatMake(MatMakeOp op);
   void emitMatMul(MatMulOp op);
   void emitTranspose(TransposeOp op);
   void emitDeterminant(DeterminantOp op);

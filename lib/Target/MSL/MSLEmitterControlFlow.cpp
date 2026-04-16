@@ -6,9 +6,9 @@ using namespace mlir;
 using namespace enigma;
 
 void MSLEmitter::emitFunctionConstant(FunctionConstantOp op) {
-  std::string ty = getTypeString(op.getResult().getType());
-  stream() << "    constant " << ty << " " << getName(op.getResult())
-           << " [[function_constant(" << op.getIndex() << ")]];\n";
+  // Declaration is hoisted to file scope by emitFunctionConstants(); the
+  // value's name has already been assigned. Emit nothing at the use site.
+  (void)op;
 }
 
 void MSLEmitter::emitScfFor(mlir::scf::ForOp op) {

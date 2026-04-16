@@ -4,6 +4,15 @@
 using namespace mlir;
 using namespace enigma;
 
+void MSLEmitter::emitMatMake(MatMakeOp op) {
+  std::string ty = getTypeString(op.getResult().getType());
+  auto &os = stream();
+  os << "    " << ty << " " << getName(op.getResult()) << " = " << ty << "(";
+  llvm::interleaveComma(op.getColumns(), os,
+                        [&](mlir::Value v) { os << getName(v); });
+  os << ");\n";
+}
+
 void MSLEmitter::emitMatMul(MatMulOp op) {
   std::string ty = getTypeString(op.getResult().getType());
   stream() << "    " << ty << " " << getName(op.getResult()) << " = "

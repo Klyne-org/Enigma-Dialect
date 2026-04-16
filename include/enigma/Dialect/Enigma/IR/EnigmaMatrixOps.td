@@ -17,6 +17,20 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 // We model matrices as vector<CxRxf32> in MLIR for now.
 // ============================================================================
 
+def Enigma_MatMakeOp : Enigma_Op<"mat_make", [Pure]> {
+  let summary = "Assemble a matrix from column vectors";
+  let description = [{
+    Build a `vector<CxRx{f|i}>` matrix from C column operands, each of type
+    `vector<Rx{f|i}>`. C and R must each be in {2,3,4} (MSL native matrix
+    widths). Lowers to `floatCxR(col0, col1, ...)` in MSL.
+  }];
+  let arguments = (ins Variadic<AnyVectorOfNonZeroRank>:$columns);
+  let results   = (outs AnyVectorOfNonZeroRank:$result);
+  let assemblyFormat =
+      "$columns attr-dict `:` type($columns) `->` type($result)";
+  let hasVerifier = 1;
+}
+
 def Enigma_MatMulOp : Enigma_Op<"matmul", [Pure]> {
   let summary = "Matrix multiply — A * B";
   let arguments = (ins AnyType:$lhs, AnyType:$rhs);
