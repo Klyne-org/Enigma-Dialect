@@ -53,6 +53,12 @@ std::string MSLEmitter::getTypeString(Type type) {
     if (shape.size() == 2) {
       // MSL matrices: CxR stored as vector<CxRxT> — emit as elem + "CxR"
       int64_t cols = shape[0], rows = shape[1];
+      // Simdgroup matrices use hardware matrix units (8x8 currently on Apple
+      // Silicon). Map vector<RxCxT> with R,C > 1 and outside the small-matrix
+      // range to simdgroup_<elem><R>x<C>.
+      if ((cols < 2 || cols > 4 || rows < 2 || rows > 4) && cols > 1 && rows > 1)
+        return "simdgroup_" + elem + std::to_string(cols) + "x" +
+               std::to_string(rows);
       if (cols < 2 || cols > 4 || rows < 2 || rows > 4)
         return "/* unsupported matrix dims " + std::to_string(cols) + "x" +
                std::to_string(rows) + " */ " + elem;

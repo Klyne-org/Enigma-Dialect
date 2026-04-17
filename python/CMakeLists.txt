@@ -27,6 +27,7 @@ declare_mlir_python_extension(EnigmaPythonSources.Extension
     MLIRCAPIArith
     MLIRCAPIMemRef
     MLIRCAPIFunc
+    MLIRCAPISCF
 )
 
 set(_source_components
@@ -35,6 +36,7 @@ set(_source_components
   MLIRPythonSources.Dialects.func
   MLIRPythonSources.Dialects.memref
   MLIRPythonSources.Dialects.arith
+  MLIRPythonSources.Dialects.scf
   MLIRPythonExtension.Core
   EnigmaPythonSources
 )

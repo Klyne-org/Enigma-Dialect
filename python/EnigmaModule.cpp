@@ -3,6 +3,7 @@
 #include "mlir-c/Dialect/Arith.h"
 #include "mlir-c/Dialect/Func.h"
 #include "mlir-c/Dialect/MemRef.h"
+#include "mlir-c/Dialect/SCF.h"
 #include "mlir-c/BuiltinAttributes.h"
 #include "mlir-c/BuiltinTypes.h"
 #include "mlir-c/IR.h"
@@ -38,11 +39,15 @@ NB_MODULE(_mlirDialectsEnigma, m) {
         MlirDialectHandle funcHandle = mlirGetDialectHandle__func__();
         mlirDialectHandleRegisterDialect(funcHandle, context);
 
+        MlirDialectHandle scfHandle = mlirGetDialectHandle__scf__();
+        mlirDialectHandleRegisterDialect(scfHandle, context);
+
         if (load) {
           mlirDialectHandleLoadDialect(enigmaHandle, context);
           mlirDialectHandleLoadDialect(arithHandle, context);
           mlirDialectHandleLoadDialect(memrefHandle, context);
           mlirDialectHandleLoadDialect(funcHandle, context);
+          mlirDialectHandleLoadDialect(scfHandle, context);
         }
       },
       nb::arg("context"), nb::arg("load") = true);
