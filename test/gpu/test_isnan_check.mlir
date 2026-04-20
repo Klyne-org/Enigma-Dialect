@@ -1,6 +1,17 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: out[i] = isnan(in[i]) ? 1.0 : 0.0
 // Input: in[0]=NaN, in[1]=1.0, in[2]=inf, in[3]=0.0, ...
 // Expect: out[0]=1, out[1]=0, out[2]=0, out[3]=0, ...
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void isnan_check(
+// CHECK:         thread_position_in_grid
+// CHECK:         isnan(
+// CHECK:         select(
+
 module {
   enigma.kernel @isnan_check(%in: memref<?xf32>, %out: memref<?xf32>) {
     %id = enigma.thread_position_in_grid x

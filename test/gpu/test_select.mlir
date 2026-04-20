@@ -1,6 +1,16 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: out[i] = select(a[i], b[i], cond[i])
 // Input: a[i]=i, b[i]=100+i, cond[i] = (i%2==0) stored as i1 buffer trick
 // We use a simpler test: a[i]=0, b[i]=i, cond=true → out[i]=i
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void select_test(
+// CHECK:         thread_position_in_grid
+// CHECK:         select(
+
 module {
   enigma.kernel @select_test(%a: memref<?xf32>, %b: memref<?xf32>,
                              %out: memref<?xf32>) {

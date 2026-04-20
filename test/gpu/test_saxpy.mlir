@@ -1,6 +1,17 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: SAXPY  out[i] = a * x[i] + y[i]
 // Input:  x[i] = i,  y[i] = 100,  a_buf[0] = 2.0
 // Expect: out[i] = 2*i + 100
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void saxpy(
+// CHECK:         thread_position_in_grid
+// CHECK:         v{{[0-9]+}} * v{{[0-9]+}}
+// CHECK:         v{{[0-9]+}} + v{{[0-9]+}}
+
 module {
   enigma.kernel @saxpy(%a_buf: memref<?xf32, 1>, %x: memref<?xf32>,
                        %y: memref<?xf32>, %out: memref<?xf32>) {
