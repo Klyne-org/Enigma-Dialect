@@ -114,6 +114,7 @@ public:
   // === Upstream dialect ops (MSLEmitterUpstream.cpp) ===
   void emitLoad(mlir::memref::LoadOp op);
   void emitStore(mlir::memref::StoreOp op);
+  void emitMemRefCast(mlir::memref::CastOp op);
   void emitArithBinOp(mlir::Operation *op, llvm::StringRef sym);
   void emitArithNeg(mlir::arith::NegFOp op);
   void emitConstant(mlir::arith::ConstantOp op);

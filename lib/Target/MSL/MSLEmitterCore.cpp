@@ -486,6 +486,7 @@ void MSLEmitter::emitOp(Operation &op) {
   // --- Upstream arith/memref ---
   if (auto o = dyn_cast<memref::LoadOp>(op))  return emitLoad(o);
   if (auto o = dyn_cast<memref::StoreOp>(op)) return emitStore(o);
+  if (auto o = dyn_cast<memref::CastOp>(op))  return emitMemRefCast(o);
 
   if (isa<arith::AddFOp>(op))  return emitArithBinOp(&op, "+");
   if (isa<arith::SubFOp>(op))  return emitArithBinOp(&op, "-");
