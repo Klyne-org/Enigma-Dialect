@@ -1,9 +1,5 @@
 // RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
 
-// =============================================================================
-// texture_queries.mlir — Tests for texture_get_width and texture_get_height
-// =============================================================================
-
 // CHECK: #include <metal_stdlib>
 // CHECK: using namespace metal;
 
@@ -19,6 +15,8 @@ module {
     // CHECK: get_height(
     %h = enigma.texture_get_height %tex : memref<?x?xvector<4xf32>>
 
+    %w_i32 = arith.index_cast %w : index to i32
+    memref.store %w_i32, %out[%id] : memref<?xi32>
     enigma.return
   }
 }

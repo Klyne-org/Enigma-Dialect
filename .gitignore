@@ -44,3 +44,4 @@ __pycache__/
 # in the build directory, never in the source tree.
 *.air
 *.metallib
+.cache
