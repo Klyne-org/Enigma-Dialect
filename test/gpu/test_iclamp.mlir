@@ -1,6 +1,16 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: out[i] = clamp(in[i], 0, 100)
 // Input: in[i] = i - 50  (range: -50 to 973)
 // Expect: out[i] = max(0, min(in[i], 100))
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void iclamp_test(
+// CHECK:         thread_position_in_grid
+// CHECK:         clamp(
+
 module {
   enigma.kernel @iclamp_test(%in: memref<?xi32>, %out: memref<?xi32>) {
     %id = enigma.thread_position_in_grid x

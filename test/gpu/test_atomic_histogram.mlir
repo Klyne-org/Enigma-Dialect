@@ -1,6 +1,16 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: count occurrences of value 0 using atomics
 // Input:  data[i] = 0 for all i,  count[0] = 0
 // Expect: count[0] = N  (every thread increments)
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void atomic_count(
+// CHECK:         thread_position_in_grid
+// CHECK:         atomic_fetch_add_explicit
+
 module {
   enigma.kernel @atomic_count(%data: memref<?xi32>, %count: memref<?xi32>) {
     %id = enigma.thread_position_in_grid x

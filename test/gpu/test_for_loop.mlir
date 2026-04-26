@@ -1,5 +1,15 @@
+// RUN: enigma-translate --enigma-to-msl %s | FileCheck %s
+
 // GPU test: out[i] = sum(0..9) = 45 for all i (loop test)
 // Uses scf.for to compute a simple sum
+
+// CHECK: #include <metal_stdlib>
+// CHECK: using namespace metal;
+
+// CHECK-LABEL: kernel void for_loop_test(
+// CHECK:         thread_position_in_grid
+// CHECK:         for (
+
 module {
   enigma.kernel @for_loop_test(%out: memref<?xf32>) {
     %id = enigma.thread_position_in_grid x

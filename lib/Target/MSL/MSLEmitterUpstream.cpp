@@ -56,6 +56,17 @@ void MSLEmitter::emitStore(memref::StoreOp op) {
   os << "] = " << getName(op.getValue()) << ";\n";
 }
 
+void MSLEmitter::emitMemRefCast(memref::CastOp op) {
+  auto resultType = cast<MemRefType>(op.getResult().getType());
+  std::string elemTy = getTypeString(resultType.getElementType());
+  unsigned addrSpace = resultType.getMemorySpaceAsInt();
+  llvm::StringRef space = getAddressSpaceString(addrSpace);
+  auto &os = stream();
+  os << "    " << space << " " << elemTy << "* " << getName(op.getResult())
+     << " = (" << space << " " << elemTy << "*)"
+     << getName(op.getOperand()) << ";\n";
+}
+
 void MSLEmitter::emitArithBinOp(Operation *op, llvm::StringRef sym) {
   std::string ty = getTypeString(op->getResult(0).getType());
   stream() << "    " << ty << " " << getName(op->getResult(0)) << " = "
