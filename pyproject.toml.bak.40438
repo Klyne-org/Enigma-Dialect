@@ -1,0 +1,32 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "setuptools"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "enigma-dialect"
+version = "0.1.0"
+description = "Python bindings for the Enigma MLIR dialect"
+readme = "README.md"
+requires-python = "==3.11.*"
+license = { text = "MIT" }
+authors = [{ name = "Tanmay Patil" }]
+classifiers = [
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: MacOS",
+]
+
+[project.urls]
+Repository = "https://github.com/Klyne-Research/Enigma-Dialect"
+
+[tool.scikit-build]
+cmake.version = ">=3.20"
+ninja.version = ">=1.10"
+build-dir = "build-wheel/{wheel_tag}"
+wheel.packages = []
+wheel.install-dir = "."
+install.components = ["EnigmaPythonModules"]
+
+[tool.scikit-build.cmake.define]
+ENIGMA_ENABLE_PYTHON_BINDINGS = "ON"
+ENIGMA_ENABLE_METAL_RUNTIME = "OFF"
+CMAKE_BUILD_TYPE = "Release"

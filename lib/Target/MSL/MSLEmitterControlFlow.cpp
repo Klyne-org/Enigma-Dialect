@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterControlFlow.cpp - scf.for/if + function_constant --------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 using namespace mlir;
 using namespace enigma;

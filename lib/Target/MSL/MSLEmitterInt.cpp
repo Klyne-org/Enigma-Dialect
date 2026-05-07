@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterInt.cpp - Integer intrinsic emission ---------------------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"

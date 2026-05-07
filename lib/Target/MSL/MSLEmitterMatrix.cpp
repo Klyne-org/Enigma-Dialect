@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterMatrix.cpp - Matrix + simdgroup matrix emission ----------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"

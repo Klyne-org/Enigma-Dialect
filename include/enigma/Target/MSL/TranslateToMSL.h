@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- TranslateToMSL.h - Public API for Enigma->MSL translation *- C++ -*-===//
 //
 // WHAT THIS FILE IS

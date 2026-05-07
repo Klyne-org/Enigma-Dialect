@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- enigma-translate.cpp - The enigma-translate driver ----------------===//
 //
 // WHAT THIS BINARY IS

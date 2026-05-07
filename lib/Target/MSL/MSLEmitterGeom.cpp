@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterGeom.cpp - Geometric / vector function emission ----------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"

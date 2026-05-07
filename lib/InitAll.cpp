@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- InitAll.cpp - Implementation of the Enigma registration layer ------===//
 //
 // See include/enigma/InitAll.h for the why.

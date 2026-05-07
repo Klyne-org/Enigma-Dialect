@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitter.h - Enigma -> MSL emitter class decl ----------*- C++ -*-===//
 //
 // The MSLEmitter class: walks Enigma dialect IR and prints equivalent MSL.
@@ -15,6 +18,7 @@
 #include "mlir/IR/BuiltinOps.h"
 
 #include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/StringSet.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -25,6 +29,9 @@ class MSLEmitter {
   llvm::DenseMap<mlir::Value, std::string> valueNames;
   int nextVar = 0;
   llvm::StringSet<> usedBuiltins;
+  // Constants hoisted to function scope by emitKernel/emitVertex/emitFragment.
+  // emitConstant() is a no-op for these (they're already declared).
+  llvm::DenseSet<mlir::Value> hoistedConstants;
 
 public:
   explicit MSLEmitter(llvm::raw_ostream &os) : os(os) {}
@@ -155,6 +162,8 @@ public:
   // === Helpers for control flow emitter ===
   int nextVarId() { return nextVar++; }
   void assignName(mlir::Value v, const std::string &name) { valueNames[v] = name; }
+  void markHoisted(mlir::Value v) { hoistedConstants.insert(v); }
+  bool isHoisted(mlir::Value v) const { return hoistedConstants.contains(v); }
 
   // === Stream access for method impls in other TUs ===
   llvm::raw_ostream &stream() { return os; }

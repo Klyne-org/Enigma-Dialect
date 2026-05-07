@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterUpstream.cpp - arith / memref / return emission ----------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"
@@ -81,6 +84,10 @@ void MSLEmitter::emitArithNeg(arith::NegFOp op) {
 }
 
 void MSLEmitter::emitConstant(arith::ConstantOp op) {
+  // Constants are pre-emitted at function scope by hoistConstants() so they
+  // remain in scope across scf.for / scf.if bodies.
+  if (isHoisted(op.getResult()))
+    return;
   std::string ty = getTypeString(op.getResult().getType());
   auto &os = stream();
   os << "    " << ty << " " << getName(op.getResult()) << " = ";

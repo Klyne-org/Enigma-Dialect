@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterCore.cpp - Core emitter: names, types, dispatch ----------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"
@@ -255,6 +258,39 @@ static void emitFuncArgs(MSLEmitter &e, llvm::raw_ostream &os,
   }
 }
 
+// Hoist all arith.constant ops in `body` to the top of the emitted function.
+// MLIR allows constants to live at any depth in a region, but C scoping does
+// not — a constant first used inside an scf.for body cannot be referenced
+// after the loop. Emit each unique constant once at function scope; the body
+// walk will skip them via emitOp's no-op for already-named constants.
+static void hoistConstants(MSLEmitter &e, llvm::raw_ostream &os, Region &body) {
+  body.walk([&](arith::ConstantOp c) {
+    Value result = c.getResult();
+    e.markHoisted(result);
+    std::string ty = e.getTypeString(result.getType());
+    os << "    " << ty << " " << e.getName(result) << " = ";
+    if (auto intAttr = dyn_cast<IntegerAttr>(c.getValue()))
+      os << intAttr.getInt();
+    else if (auto floatAttr = dyn_cast<FloatAttr>(c.getValue()))
+      os << floatAttr.getValueAsDouble();
+    else if (auto denseAttr = dyn_cast<DenseElementsAttr>(c.getValue())) {
+      os << ty << "(";
+      bool first = true;
+      for (auto val : denseAttr.getValues<Attribute>()) {
+        if (!first) os << ", ";
+        if (auto f = dyn_cast<FloatAttr>(val))
+          os << f.getValueAsDouble();
+        else if (auto i = dyn_cast<IntegerAttr>(val))
+          os << i.getInt();
+        first = false;
+      }
+      os << ")";
+    } else
+      os << "/*unsupported const*/0";
+    os << ";\n";
+  });
+}
+
 void MSLEmitter::emitKernel(KernelOp kernel) {
   scanForBuiltins(kernel.getBody());
   os << "kernel void " << kernel.getSymName() << "(\n";
@@ -273,6 +309,7 @@ void MSLEmitter::emitKernel(KernelOp kernel) {
   }
 
   os << ") {\n";
+  hoistConstants(*this, os, kernel.getBody());
   for (Operation &op : entry) emitOp(op);
   os << "}\n\n";
 }
@@ -297,6 +334,7 @@ void MSLEmitter::emitVertex(VertexOp vertex) {
   }
 
   os << ") {\n";
+  hoistConstants(*this, os, vertex.getBody());
   for (Operation &op : entry) emitOp(op);
   os << "}\n\n";
 }
@@ -311,6 +349,7 @@ void MSLEmitter::emitFragment(FragmentOp fragment) {
 
   emitFuncArgs(*this, os, funcType, entry, true, false);
   os << ") {\n";
+  hoistConstants(*this, os, fragment.getBody());
   for (Operation &op : entry) emitOp(op);
   os << "}\n\n";
 }

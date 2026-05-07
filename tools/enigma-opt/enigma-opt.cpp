@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- enigma-opt.cpp - The enigma-opt driver -----------------------------===//
 //
 // WHAT THIS BINARY IS

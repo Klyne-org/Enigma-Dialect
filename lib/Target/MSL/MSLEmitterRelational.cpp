@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterRelational.cpp - Comparison, select, int min/max ---------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 #ifndef ENIGMA_C_DIALECTS_H
 #define ENIGMA_C_DIALECTS_H
 

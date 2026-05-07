@@ -7,13 +7,12 @@ name = "enigma-dialect"
 version = "0.1.0"
 description = "Python bindings for the Enigma MLIR dialect"
 readme = "README.md"
-requires-python = "==3.12.*"
-license = { text = "Apache-2.0" }
+requires-python = "==3.13.*"
+license = { text = "MIT" }
 authors = [{ name = "Tanmay Patil" }]
 classifiers = [
   "Programming Language :: Python :: 3.12",
   "Operating System :: MacOS",
-  "License :: OSI Approved :: Apache Software License",
 ]
 
 [project.urls]

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 // gpu-test-runner.mm — End-to-end GPU test runner for Enigma dialect kernels.
 //
 // Compiles inline or loads .metallib, dispatches kernels with known inputs,

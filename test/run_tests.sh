@@ -14,7 +14,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="$ROOT/build"
+# Override with env var BUILD_DIR if you built into a non-default location
+# (e.g. CI uses build-test/ to keep wheel builds and test builds separate).
+BUILD="${BUILD_DIR:-$ROOT/build}"
 TRANSLATE="$BUILD/tools/enigma-translate/enigma-translate"
 OPT="$BUILD/tools/enigma-opt/enigma-opt"
 RUNNER="$BUILD/tools/enigma-runner/enigma-runner"
@@ -75,10 +77,16 @@ printf "  ${GREEN}OK${NC}  Build artifacts found\n"
 # ---------------------------------------------------------------------------
 # Phase 1: Dialect roundtrip tests (parse -> print -> parse)
 # ---------------------------------------------------------------------------
+# Files containing `expected-error` / `expected-warning` are negative tests
+# meant for `enigma-opt -verify-diagnostics`; they intentionally fail to parse
+# and have no roundtrip-able IR, so they are exercised in Phase 6 instead.
 if [ "$MODE" != "--emit-only" ]; then
     echo ""
     printf "${CYAN}=== Phase 1: Dialect Roundtrip ===${NC}\n"
     for f in "$ROOT"/test/Dialect/Enigma/*.mlir; do
+        if grep -qE 'expected-(error|warning|note|remark)' "$f"; then
+            continue
+        fi
         name="roundtrip/$(basename "$f")"
         run_test "$name" "'$OPT' '$f' | '$OPT'"
     done
@@ -125,8 +133,27 @@ else
     done
 
     for f in "$ROOT"/test/Dialect/Enigma/*.mlir; do
+        # Skip verify-diagnostics negative tests — no CHECK lines.
+        if grep -qE 'expected-(error|warning|note|remark)' "$f"; then
+            continue
+        fi
         name="check/$(basename "$f")"
         run_test "$name" "'$OPT' '$f' | '$OPT' | '$FILECHECK' '$f'"
+    done
+fi
+
+# ---------------------------------------------------------------------------
+# Phase 3b: verify-diagnostics negative tests
+# ---------------------------------------------------------------------------
+if [ "$MODE" != "--emit-only" ]; then
+    echo ""
+    printf "${CYAN}=== Phase 3b: verify-diagnostics ===${NC}\n"
+    for f in "$ROOT"/test/Dialect/Enigma/*.mlir; do
+        if ! grep -qE 'expected-(error|warning|note|remark)' "$f"; then
+            continue
+        fi
+        name="verify/$(basename "$f")"
+        run_test "$name" "'$OPT' '$f' -split-input-file -verify-diagnostics"
     done
 fi
 
@@ -141,7 +168,7 @@ if command -v xcrun &> /dev/null && xcrun --find metal &> /dev/null 2>&1; then
 
     # Tests that use texture ops modeled as memref cannot compile with xcrun
     # until the dialect has proper !enigma.texture types. Skip them.
-    XCRUN_SKIP_LIST="texture_ops texture_sample"
+    XCRUN_SKIP_LIST="texture_ops texture_sample texture_queries"
 
     for f in "$ROOT"/test/Target/MSL/*.mlir; do
         base="$(basename "$f" .mlir)"

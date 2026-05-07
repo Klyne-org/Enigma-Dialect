@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 #include "enigma-c/Dialects.h"
 
 #include "enigma/Dialect/Enigma/IR/EnigmaDialect.h"

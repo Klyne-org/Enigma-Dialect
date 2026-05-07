@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- EnigmaDialect.h - Enigma dialect public header ----------*- C++ -*-===//
 //
 // WHAT THIS FILE IS

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- InitAll.h - Single registration entry point for Enigma -*- C++ -*-===//
 //
 // WHAT THIS FILE IS

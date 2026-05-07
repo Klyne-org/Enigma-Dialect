@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Klyne Research
+
 //===- MSLEmitterTexture.cpp - Texture operation emission -----------------===//
 
 #include "enigma/Target/MSL/MSLEmitter.h"
