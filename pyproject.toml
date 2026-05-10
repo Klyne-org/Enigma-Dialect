@@ -7,7 +7,7 @@ name = "enigma-dialect"
 version = "0.1.0"
 description = "Python bindings for the Enigma MLIR dialect"
 readme = "README.md"
-requires-python = "==3.13.*"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Tanmay Patil" }]
 classifiers = [

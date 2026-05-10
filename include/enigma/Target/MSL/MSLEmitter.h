@@ -32,6 +32,13 @@ class MSLEmitter {
   // Constants hoisted to function scope by emitKernel/emitVertex/emitFragment.
   // emitConstant() is a no-op for these (they're already declared).
   llvm::DenseSet<mlir::Value> hoistedConstants;
+  // Indices of kernel block arguments that are touched by atomic_* ops.
+  // ``emitFuncArgs`` emits these as ``device atomic_T*`` instead of
+  // ``device T*``; the atomic emitters skip the pointer cast for them.
+  // Without this, atomic ops cast a plain ``device int*`` to
+  // ``(device atomic_int*)`` at the use site, which is undefined behavior
+  // per the MSL spec.
+  llvm::SmallDenseSet<unsigned> atomicArgs;
 
 public:
   explicit MSLEmitter(llvm::raw_ostream &os) : os(os) {}
@@ -60,6 +67,12 @@ public:
 
   // === Scanning ===
   void scanForBuiltins(mlir::Region &body);
+  // Walks a kernel/vertex/fragment body for atomic_* ops; for each one,
+  // climbs the memref operand to its source. If the source is a direct
+  // block argument of ``entry``, records the argument index in
+  // ``atomicArgs``. Called before ``emitFuncArgs`` so the signature can
+  // emit the correct atomic_T* type.
+  void scanForAtomicArgs(mlir::Region &body, mlir::Block &entry);
   void emitBuiltinParam(llvm::StringRef builtin);
 
   // === Thread indexing (MSLEmitterThread.cpp) ===
@@ -162,6 +175,10 @@ public:
   // === Helpers for control flow emitter ===
   int nextVarId() { return nextVar++; }
   void assignName(mlir::Value v, const std::string &name) { valueNames[v] = name; }
+
+  // True iff kernel block-arg index ``i`` is touched by an atomic_* op
+  // and should be emitted as ``device atomic_T*`` in the kernel signature.
+  bool isAtomicArg(unsigned i) const { return atomicArgs.contains(i); }
   void markHoisted(mlir::Value v) { hoistedConstants.insert(v); }
   bool isHoisted(mlir::Value v) const { return hoistedConstants.contains(v); }
 

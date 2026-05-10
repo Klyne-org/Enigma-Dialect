@@ -170,6 +170,30 @@ void MSLEmitter::scanForBuiltins(Region &body) {
   });
 }
 
+// Walk all atomic_* ops; for each, climb the memref operand to its source
+// and record the corresponding kernel block-arg index. The atomic
+// memref is always operand(0).
+void MSLEmitter::scanForAtomicArgs(Region &body, Block &entry) {
+  atomicArgs.clear();
+  body.walk([&](Operation *op) {
+    if (!(isa<AtomicLoadOp>(op) || isa<AtomicStoreOp>(op) ||
+          isa<AtomicExchangeOp>(op) || isa<AtomicCompareExchangeWeakOp>(op) ||
+          isa<AtomicFetchAddOp>(op) || isa<AtomicFetchSubOp>(op) ||
+          isa<AtomicFetchAndOp>(op) || isa<AtomicFetchOrOp>(op) ||
+          isa<AtomicFetchXorOp>(op) || isa<AtomicFetchMinOp>(op) ||
+          isa<AtomicFetchMaxOp>(op)))
+      return;
+    Value memref = op->getOperand(0);
+    auto blockArg = dyn_cast<BlockArgument>(memref);
+    // Only direct kernel block arguments are recognized; derived memrefs
+    // (e.g. from a memref.cast) still fall through the cast-at-use path
+    // for backwards compatibility.
+    if (!blockArg || blockArg.getOwner() != &entry)
+      return;
+    atomicArgs.insert(blockArg.getArgNumber());
+  });
+}
+
 void MSLEmitter::emitBuiltinParam(llvm::StringRef builtin) {
   std::string paramName = getBuiltinParamName(builtin);
   bool isFlat = (builtin == "thread_index_in_threadgroup" ||
@@ -240,9 +264,18 @@ static void emitFuncArgs(MSLEmitter &e, llvm::raw_ostream &os,
         if (auto intAttr = dyn_cast<IntegerAttr>(ms))
           memSpace = intAttr.getInt();
       llvm::StringRef addrSpace = e.getAddressSpaceString(memSpace);
-      os << "    " << addrSpace << " " << elem << "* "
-         << e.getName(entryBlock.getArgument(i))
-         << " [[buffer(" << i << ")]]";
+      // If this buffer is touched by atomic_* ops, declare it as
+      // ``device atomic_T*`` so atomic accesses don't rely on an
+      // address-space-changing pointer cast (which is UB in MSL).
+      if (e.isAtomicArg(i)) {
+        os << "    " << addrSpace << " atomic_" << elem << "* "
+           << e.getName(entryBlock.getArgument(i))
+           << " [[buffer(" << i << ")]]";
+      } else {
+        os << "    " << addrSpace << " " << elem << "* "
+           << e.getName(entryBlock.getArgument(i))
+           << " [[buffer(" << i << ")]]";
+      }
     } else if (isFragment) {
       os << "    " << e.getTypeString(argType) << " "
          << e.getName(entryBlock.getArgument(i)) << " [[stage_in]]";
@@ -297,6 +330,10 @@ void MSLEmitter::emitKernel(KernelOp kernel) {
   auto funcType = kernel.getFunctionType();
   auto &entry = kernel.getBody().front();
   bool hasBuiltins = !usedBuiltins.empty();
+
+  // Must run BEFORE emitFuncArgs so the signature emits ``device atomic_T*``
+  // for buffers touched by atomic_* ops.
+  scanForAtomicArgs(kernel.getBody(), entry);
 
   emitFuncArgs(*this, os, funcType, entry, false, hasBuiltins);
 
