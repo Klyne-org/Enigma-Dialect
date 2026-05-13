@@ -19,6 +19,7 @@ add_mlir_translation_library(EnigmaTargetMSL
   MSLEmitterControlFlow.cpp
   MSLEmitterPack.cpp
   MSLEmitterMatrix.cpp
+  MSLEmitterAsyncCopy.cpp
 
   DEPENDS
   EnigmaDialectIncGen

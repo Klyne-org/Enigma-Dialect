@@ -16,6 +16,7 @@
 //   EnigmaGeomOps.td    — geometric / vector functions
 //   EnigmaTextureOps.td — texture read / write / sample
 //   EnigmaCastOps.td    — type casts and packing
+//   EnigmaAsyncCopyOps.td — simdgroup async copy (AIR intrinsics)
 //
 //===----------------------------------------------------------------------===//
 
@@ -48,5 +49,6 @@ include "enigma/Dialect/Enigma/IR/EnigmaQuadOps.td"
 include "enigma/Dialect/Enigma/IR/EnigmaControlFlowOps.td"
 include "enigma/Dialect/Enigma/IR/EnigmaPackOps.td"
 include "enigma/Dialect/Enigma/IR/EnigmaMatrixOps.td"
+include "enigma/Dialect/Enigma/IR/EnigmaAsyncCopyOps.td"
 
 #endif // ENIGMA_OPS_TD

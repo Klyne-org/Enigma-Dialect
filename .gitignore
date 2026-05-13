@@ -16,11 +16,17 @@
 # --- build artifacts ---------------------------------------------------------
 build/
 build-*/
+build-wheel/
 cmake-build-*/
 *.o
 *.a
 *.so
 *.dylib
+
+# --- Python wheel build / dist outputs ---
+dist/
+wheelhouse/
+*.whl
 
 # --- MLIR tablegen generated files (shouldn't appear in-tree, but just in case)
 *.inc
@@ -37,7 +43,11 @@ cmake-build-*/
 __pycache__/
 *.pyc
 .venv/
+venv/
 *.egg-info/
+
+# --- pyproject.toml temp backups (build_all.sh writes these) ---
+pyproject.toml.bak.*
 
 # --- Metal build products ---------------------------------------------------
 # These are intermediate and final artifacts from `xcrun metal` — they belong

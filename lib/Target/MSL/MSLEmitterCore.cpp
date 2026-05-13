@@ -645,6 +645,13 @@ void MSLEmitter::emitOp(Operation &op) {
   if (isa<UnpackSrgbUnorm4x8ToFloatOp>(op)) return emitUnpackOp(&op, "unpack_unorm4x8_srgb_to_float");
   if (isa<UnpackUnorm10a2ToFloatOp>(op)) return emitUnpackOp(&op, "unpack_unorm10a2_to_float");
 
+  // --- Async copy (AIR intrinsics, raw asm) ---
+  if (auto o = dyn_cast<AsyncCopy1dD2TOp>(op)) return emitAsyncCopy1dD2T(o);
+  if (auto o = dyn_cast<AsyncCopy1dT2DOp>(op)) return emitAsyncCopy1dT2D(o);
+  if (auto o = dyn_cast<AsyncCopy2dD2TOp>(op)) return emitAsyncCopy2dD2T(o);
+  if (auto o = dyn_cast<AsyncCopy2dT2DOp>(op)) return emitAsyncCopy2dT2D(o);
+  if (auto o = dyn_cast<AsyncCopyWaitOp>(op))  return emitAsyncCopyWait(o);
+
   // --- Matrix ---
   if (auto o = dyn_cast<MatMakeOp>(op))      return emitMatMake(o);
   if (auto o = dyn_cast<MatMulOp>(op))       return emitMatMul(o);
@@ -665,6 +672,7 @@ void MSLEmitter::emitOp(Operation &op) {
 LogicalResult enigma::translateToMSL(ModuleOp module, llvm::raw_ostream &os) {
   MSLEmitter emitter(os);
   emitter.emitPreamble();
+  emitter.emitAsyncCopyFileScopeIfNeeded(module);
   emitter.emitFunctionConstants(module);
   module.walk([&](KernelOp k) { emitter.emitKernel(k); });
   module.walk([&](VertexOp v) { emitter.emitVertex(v); });

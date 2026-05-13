@@ -162,6 +162,17 @@ public:
   void emitPackOp(mlir::Operation *op, llvm::StringRef funcName);
   void emitUnpackOp(mlir::Operation *op, llvm::StringRef funcName);
 
+  // === Async copy (MSLEmitterAsyncCopy.cpp) ===
+  // Emits the inline ``asm("air.*")`` extern declarations + opaque event type
+  // exactly once at file scope, gated on whether *any* kernel in the module
+  // uses async copy.
+  void emitAsyncCopyFileScopeIfNeeded(mlir::ModuleOp module);
+  void emitAsyncCopy1dD2T(AsyncCopy1dD2TOp op);
+  void emitAsyncCopy1dT2D(AsyncCopy1dT2DOp op);
+  void emitAsyncCopy2dD2T(AsyncCopy2dD2TOp op);
+  void emitAsyncCopy2dT2D(AsyncCopy2dT2DOp op);
+  void emitAsyncCopyWait(AsyncCopyWaitOp op);
+
   // === Matrix (MSLEmitterMatrix.cpp) ===
   void emitMatMake(MatMakeOp op);
   void emitMatMul(MatMulOp op);
