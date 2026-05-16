@@ -78,7 +78,7 @@ CXX="$(xcrun --find clang++)"
 SDKROOT="$(xcrun --show-sdk-path)"
 export CC CXX SDKROOT
 
-# Pick a Python. MLIR 22.x bindings work with Python 3.10–3.13.
+# Pick a Python. MLIR 22.x bindings work with Python 3.10-3.13.
 # We create a dedicated venv under $PREFIX so we don't fight Homebrew's
 # PEP 668 restriction and don't pollute the system Python.
 VENV_DIR="$PREFIX/venv"
