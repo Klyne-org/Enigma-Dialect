@@ -27,6 +27,14 @@ jobs:
           brew install cmake ninja
           python3 -m pip install --upgrade pip build scikit-build-core wheel
 
+      - name: Prefer Python 3.13 for wheel builds
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.ci-python"
+          ln -sf "$(command -v python3.13)" "$GITHUB_WORKSPACE/.ci-python/python3.12"
+          ln -sf "$(command -v python3.13)" "$GITHUB_WORKSPACE/.ci-python/python3.13"
+          echo "$GITHUB_WORKSPACE/.ci-python" >> "$GITHUB_PATH"
+          python3.12 -c 'import sys; print(sys.version)'
+
       - name: Build LLVM and MLIR
         run: ./scripts/build_llvm.sh
 
