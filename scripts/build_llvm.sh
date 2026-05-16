@@ -78,13 +78,13 @@ CXX="$(xcrun --find clang++)"
 SDKROOT="$(xcrun --show-sdk-path)"
 export CC CXX SDKROOT
 
-# Pick a Python. MLIR 22.x bindings work with Python 3.10–3.13.
+# Pick a Python. MLIR 22.x bindings work with Python 3.11-3.13.
 # We create a dedicated venv under $PREFIX so we don't fight Homebrew's
 # PEP 668 restriction and don't pollute the system Python.
 VENV_DIR="$PREFIX/venv"
 
 pick_python() {
-  for candidate in python3.12 python3.13 python3.11 python3.10; do
+  for candidate in python3.13 python3.12 python3.11; do
     if command -v "$candidate" >/dev/null 2>&1; then
       echo "$(command -v "$candidate")"
       return 0
@@ -92,7 +92,7 @@ pick_python() {
   done
   local v
   v="$(python3 -c 'import sys; print(f"{sys.version_info.major}{sys.version_info.minor}")' 2>/dev/null || echo 0)"
-  if [[ "$v" -ge 310 && "$v" -le 313 ]]; then
+  if [[ "$v" -ge 311 && "$v" -le 313 ]]; then
     echo "$(command -v python3)"
     return 0
   fi
@@ -100,8 +100,8 @@ pick_python() {
 }
 
 HOST_PYTHON="$(pick_python)" || {
-  echo "error: need Python 3.10-3.13 for MLIR bindings." >&2
-  echo "       install via: brew install python@3.12" >&2
+  echo "error: need Python 3.11-3.13 for MLIR bindings." >&2
+  echo "       install via: brew install python@3.13" >&2
   exit 1
 }
 

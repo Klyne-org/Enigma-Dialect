@@ -1,0 +1,58 @@
+name: Build macOS wheel
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-wheel:
+    name: Build wheel on Apple Silicon
+    runs-on: macos-15-xlarge
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install build tools
+        run: |
+          brew install cmake ninja
+          python3 -m pip install --upgrade pip build scikit-build-core wheel
+
+      - name: Build LLVM and MLIR
+        run: ./scripts/build_llvm.sh
+
+      - name: Build wheel
+        run: |
+          source "$HOME/.local/enigma-llvm/activate.sh"
+          ./scripts/build-wheel.sh
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enigma-dialect-wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+      - name: Attach wheel to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          asset_names="$(gh release view "${{ github.event.release.tag_name }}" --json assets --jq '.assets[].name')"
+          for wheel in dist/*.whl; do
+            asset="$(basename "$wheel")"
+            if printf '%s\n' "$asset_names" | grep -Fxq "$asset"; then
+              echo "Preserving existing release asset: $asset"
+            else
+              gh release upload "${{ github.event.release.tag_name }}" "$wheel"
+            fi
+          done

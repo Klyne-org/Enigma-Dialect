@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Build a self-contained Enigma dialect wheel for macOS arm64, cpython-3.12.
+# Build a self-contained Enigma dialect wheel for macOS arm64.
 #
 # Usage:
 #   source ~/.local/enigma-llvm/activate.sh
 #   ./scripts/build-wheel.sh
 #
-# Output: dist/enigma_dialect-<ver>-cp312-cp312-macosx_*_arm64.whl
+# Output: dist/enigma_dialect-<ver>-cp*-cp*-macosx_*_arm64.whl
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
