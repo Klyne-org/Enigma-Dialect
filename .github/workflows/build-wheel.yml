@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-wheel:
     name: Build wheel on Apple Silicon
-    runs-on: macos-15
+    runs-on: macos-15-xlarge
 
     steps:
       - name: Check out repository
