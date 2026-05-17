@@ -41,18 +41,40 @@ adding new features is a tight edit → build → test loop.
 
 ## Building
 
-You need a **prebuilt LLVM + MLIR** on the system. The easiest path on
-macOS is Homebrew:
+> If you just want to **use** the Enigma DSL on Apple Silicon, don't build
+> this from source — `pip install enigma-dsl` ships a wheel that already
+> contains the dialect, libLLVM, and libMLIRPythonCAPI. Build from source
+> only if you are hacking on the dialect itself.
+
+You need a **prebuilt LLVM + MLIR** on the system, configured with the
+MLIR Python bindings (LLVM 22.x onward uses nanobind, which this dialect
+relies on via `NanobindAdaptors.h`). Apple's stock Homebrew `llvm`
+formula is **not** sufficient — it doesn't ship the MLIR Python
+bindings, and it tracks the LLVM major version Homebrew has settled on,
+not the one this dialect targets.
+
+The supported path is to build LLVM 22.x in-tree under
+`~/.local/enigma-llvm/` using the helper script:
 
 ```bash
-brew install llvm ninja cmake
-export MLIR_DIR=$(brew --prefix llvm)/lib/cmake/mlir
-export LLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm
+brew install cmake ninja
+bash scripts/build_llvm.sh         # ~30-90 min first time, isolated build
+source ~/.local/enigma-llvm/activate.sh   # puts MLIR_DIR / LLVM_DIR on shell
 ```
 
-If you built LLVM from source, set `MLIR_DIR` and `LLVM_DIR` to the
-matching subdirectories of your LLVM build tree (they contain
-`MLIRConfig.cmake` and `LLVMConfig.cmake` respectively).
+`build_llvm.sh` produces a generic arm64 build that works on M1 through
+M5 (no `-march=native`, no CPU-specific tuning), with
+`CMAKE_OSX_DEPLOYMENT_TARGET=14.0` so the resulting libraries link
+against the macOS 14 SDK floor — they run on **macOS 14, 15, and every
+newer version**. The published Enigma DSL wheels themselves are built
+twice (with `MACOSX_DEPLOYMENT_TARGET=14.0` and `=15.0`) so `pip` can
+pick the most specific wheel for the host.
+
+If you already built LLVM elsewhere, set `MLIR_DIR` and `LLVM_DIR` to
+the matching subdirectories of your build tree (they contain
+`MLIRConfig.cmake` and `LLVMConfig.cmake` respectively) **before**
+invoking CMake — `activate.sh` is one way to do that, but exporting the
+two vars by hand works equally well.
 
 Then, from the project root:
 
@@ -61,6 +83,17 @@ cmake -S . -B build -G Ninja
 ninja -C build
 ninja -C build check-enigma    # runs the lit regression suite
 ```
+
+### Building the Python wheel
+
+This dialect ships as a Python wheel as part of the `enigma-dsl` PyPI
+release. The wheel pipeline lives in the parent
+[`Enigma-DSL`](../Enigma-DSL) repo — its `build_all.sh` drives this
+project's `scripts/build-wheel.sh` once per Python ABI, fixes Mach-O
+rpaths so the bundled dylibs load from `@loader_path`, then merges the
+output with the pure-Python DSL. See
+[`Enigma-DSL/README.md`](../Enigma-DSL/README.md) for the full
+two-stage build flow.
 
 ## Running the end-to-end demo
 
