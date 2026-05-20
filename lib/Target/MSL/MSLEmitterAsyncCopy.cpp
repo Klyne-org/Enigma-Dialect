@@ -47,12 +47,14 @@ void MSLEmitter::emitAsyncCopyFileScopeIfNeeded(ModuleOp module) {
   os << "// ---- enigma async copy: AIR intrinsics (asm-bound) ----\n";
   os << "struct _enigma_async_event_t;\n";
   os << "thread _enigma_async_event_t* __enigma_async_copy_1d_d2t(\n"
+        "    ulong elem_size, ulong elem_align,\n"
         "    threadgroup void* dst, const device void* src,\n"
-        "    ulong num_elements, ulong elem_size, ulong elem_align)\n"
+        "    ulong num_elements)\n"
         "    __asm(\"air.simdgroup_async_copy_1d.p3i8.p1i8\");\n";
   os << "thread _enigma_async_event_t* __enigma_async_copy_1d_t2d(\n"
+        "    ulong elem_size, ulong elem_align,\n"
         "    device void* dst, const threadgroup void* src,\n"
-        "    ulong num_elements, ulong elem_size, ulong elem_align)\n"
+        "    ulong num_elements)\n"
         "    __asm(\"air.simdgroup_async_copy_1d.p1i8.p3i8\");\n";
   os << "thread _enigma_async_event_t* __enigma_async_copy_2d_d2t(\n"
         "    ulong elem_size, ulong elem_align,\n"
@@ -87,12 +89,12 @@ void MSLEmitter::emitAsyncCopy1dD2T(AsyncCopy1dD2TOp op) {
   assignName(op.getEvent(), evName);
   stream() << "    thread _enigma_async_event_t* " << evName
            << " = __enigma_async_copy_1d_d2t(\n"
+           << "        sizeof(" << evt << "), alignof(" << evt << "),\n"
            << "        (threadgroup void*)(" << getName(op.getDst())
            << " + " << getName(op.getDstOffset()) << "),\n"
            << "        (const device void*)(" << getName(op.getSrc())
            << " + " << getName(op.getSrcOffset()) << "),\n"
-           << "        ulong(" << getName(op.getNumElements()) << "),\n"
-           << "        sizeof(" << evt << "), alignof(" << evt << "));\n";
+           << "        ulong(" << getName(op.getNumElements()) << "));\n";
 }
 
 void MSLEmitter::emitAsyncCopy1dT2D(AsyncCopy1dT2DOp op) {
@@ -101,12 +103,12 @@ void MSLEmitter::emitAsyncCopy1dT2D(AsyncCopy1dT2DOp op) {
   assignName(op.getEvent(), evName);
   stream() << "    thread _enigma_async_event_t* " << evName
            << " = __enigma_async_copy_1d_t2d(\n"
+           << "        sizeof(" << evt << "), alignof(" << evt << "),\n"
            << "        (device void*)(" << getName(op.getDst())
            << " + " << getName(op.getDstOffset()) << "),\n"
            << "        (const threadgroup void*)(" << getName(op.getSrc())
            << " + " << getName(op.getSrcOffset()) << "),\n"
-           << "        ulong(" << getName(op.getNumElements()) << "),\n"
-           << "        sizeof(" << evt << "), alignof(" << evt << "));\n";
+           << "        ulong(" << getName(op.getNumElements()) << "));\n";
 }
 
 void MSLEmitter::emitAsyncCopy2dD2T(AsyncCopy2dD2TOp op) {
